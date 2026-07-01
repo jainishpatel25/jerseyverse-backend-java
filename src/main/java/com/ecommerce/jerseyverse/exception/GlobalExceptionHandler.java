@@ -4,6 +4,7 @@ import com.ecommerce.jerseyverse.common.entity.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -73,6 +74,22 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(
                 HttpStatus.CONFLICT,
                 ex.getMessage(),
+                request
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
+        String message = ex.getBindingResult()
+                .getFieldError()
+                .getDefaultMessage();
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                message,
                 request
         );
     }
