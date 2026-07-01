@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: jerseyverse-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jerseyverse_db
+    username: postgres
+    password: jainish
+
+server:
+  port: 8081
