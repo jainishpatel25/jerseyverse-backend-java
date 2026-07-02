@@ -1,7 +1,9 @@
 package com.ecommerce.jerseyverse.mapper;
 
 import com.ecommerce.jerseyverse.dto.request.RegisterRequestDto;
+import com.ecommerce.jerseyverse.dto.request.UpdateUserRequestDto;
 import com.ecommerce.jerseyverse.dto.response.RegisterResponseDto;
+import com.ecommerce.jerseyverse.dto.response.UserProfileResponseDto;
 import com.ecommerce.jerseyverse.entity.User;
 
 public class UserMapper {
@@ -32,6 +34,27 @@ public class UserMapper {
         response.setMessage("User registered successfully.");
 
         return response;
+    }
+
+    public static UserProfileResponseDto toUserProfileResponse(User user) {
+
+        UserProfileResponseDto response = new UserProfileResponseDto();
+
+        response.setId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setPhoneNumber(user.getPhoneNumber());
+        response.setRole(user.getRole().name());
+        response.setActive(user.isActive());
+
+        return response;
+    }
+
+    public static void updateUser(User user, UpdateUserRequestDto request) {
+
+        user.setName(request.getName());
+        user.setPhoneNumber(request.getPhoneNumber());
+
     }
 
 }
