@@ -7,8 +7,10 @@ import com.ecommerce.jerseyverse.dto.response.RegisterResponseDto;
 import com.ecommerce.jerseyverse.entity.User;
 import com.ecommerce.jerseyverse.enums.Role;
 import com.ecommerce.jerseyverse.exception.ConflictException;
+import com.ecommerce.jerseyverse.exception.UnauthorizedException;
 import com.ecommerce.jerseyverse.mapper.UserMapper;
 import com.ecommerce.jerseyverse.repository.UserRepository;
+import com.ecommerce.jerseyverse.security.jwt.JwtService;
 import com.ecommerce.jerseyverse.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,13 @@ public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtService jwtService;
+
     public AuthServiceImpl(UserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -50,6 +55,29 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponseDto login(LoginRequestDto request) {
-        return null;
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new UnauthorizedException("Invalid email or password."));
+
+        if (!user.isActive()) {
+            throw new UnauthorizedException("Your account has been disabled.");
+        }
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new UnauthorizedException("Invalid email or password.");
+        }
+
+        String token = jwtService.generateToken(user);
+
+        LoginResponseDto response = new LoginResponseDto();
+
+        response.setAccessToken(token);
+        response.setTokenType("Bearer");
+
+        return response;
     }
 }

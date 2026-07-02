@@ -15,5 +15,9 @@ spring:
       hibernate:
         format_sql: true
 
+jwt:
+    secret: 8vP7mX2kN5qL9rT4yH1cJ6wE3uF8aB2zK7nM5pQ9sR4tY6vX1cD8eF3gH7jL2mN
+    expiration: 86400000
+
 server:
   port: 8081
