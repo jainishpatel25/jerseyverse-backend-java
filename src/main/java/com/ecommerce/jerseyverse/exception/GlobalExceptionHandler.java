@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,12 +25,29 @@ public class GlobalExceptionHandler {
                 status.value(),
                 status.getReasonPhrase(),
                 message,
-                request.getRequestURI()
+                request.getRequestURI(),
+                null
         );
 
         return ResponseEntity
                 .status(status)
                 .body(errorResponse);
+    }
+
+    private ErrorResponse buildErrorResponse(
+            HttpStatus status,
+            String message,
+            HttpServletRequest request,
+            Map<String, String> errors) {
+
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                request.getRequestURI(),
+                errors
+        );
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -82,14 +101,23 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
 
-        String message = ex.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
+        Map<String, String> validationErrors = new HashMap<>();
 
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                message,
-                request
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        validationErrors.put(
+                                error.getField(),
+                                error.getDefaultMessage()
+                        ));
+
+        return ResponseEntity.badRequest().body(
+                buildErrorResponse(
+                        HttpStatus.BAD_REQUEST,
+                        "Validation failed.",
+                        request,
+                        validationErrors
+                )
         );
     }
 

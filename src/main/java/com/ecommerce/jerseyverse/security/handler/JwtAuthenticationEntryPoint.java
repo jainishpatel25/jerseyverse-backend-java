@@ -34,7 +34,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 HttpStatus.UNAUTHORIZED.value(),
                 "Unauthorized",
                 "Authentication is required to access this resource.",
-                request.getRequestURI()
+                request.getRequestURI(),
+                null
         );
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
