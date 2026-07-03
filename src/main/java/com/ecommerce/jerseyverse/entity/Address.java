@@ -120,4 +120,30 @@ public class Address extends BaseEntity {
     public void setUser(User user) {
         this.user = user;
     }
+
+
+
+//    actual address entity
+//
+//    const mongoose = require('mongoose');
+//
+//const addressSchema = new mongoose.Schema({
+//        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+//        name: { type: String, required: true },
+//        phone: { type: String, required: true },
+//        email: { type: String, required: true },
+//        company: { type: String },
+//        vat: { type: String },
+//        street: { type: String, required: true },
+//        apartment: { type: String },
+//        city: { type: String, required: true },
+//        zip: { type: String, required: true },
+//        state: { type: String, required: true },
+//        country: { type: String, required: true },
+//    }, { timestamps: true });
+//
+//    module.exports = mongoose.model('Address', addressSchema);
+
+
+
 }
