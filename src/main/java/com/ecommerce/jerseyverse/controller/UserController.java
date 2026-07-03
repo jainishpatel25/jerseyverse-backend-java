@@ -1,5 +1,6 @@
 package com.ecommerce.jerseyverse.controller;
 
+import com.ecommerce.jerseyverse.dto.request.ChangePasswordRequestDto;
 import com.ecommerce.jerseyverse.dto.request.UpdateUserRequestDto;
 import com.ecommerce.jerseyverse.dto.response.UserProfileResponseDto;
 import com.ecommerce.jerseyverse.service.UserService;
@@ -32,6 +33,15 @@ public class UserController {
         return ResponseEntity.ok(
                 userService.updateProfile(request)
         );
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @Valid @RequestBody ChangePasswordRequestDto request) {
+
+        userService.changePassword(request);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
