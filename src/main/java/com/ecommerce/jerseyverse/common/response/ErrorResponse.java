@@ -1,4 +1,4 @@
-package com.ecommerce.jerseyverse.common.entity;
+package com.ecommerce.jerseyverse.common.response;
 
 import java.time.LocalDateTime;
 

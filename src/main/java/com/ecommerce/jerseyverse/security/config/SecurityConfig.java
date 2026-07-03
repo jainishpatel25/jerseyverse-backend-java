@@ -1,6 +1,8 @@
 package com.ecommerce.jerseyverse.security.config;
 
 import com.ecommerce.jerseyverse.security.filter.JwtAuthenticationFilter;
+import com.ecommerce.jerseyverse.security.handler.CustomAccessDeniedHandler;
+import com.ecommerce.jerseyverse.security.handler.JwtAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,8 +18,14 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter){
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, JwtAuthenticationEntryPoint authenticationEntryPoint, CustomAccessDeniedHandler accessDeniedHandler){
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -37,6 +45,11 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .anyRequest().authenticated()
+                )
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
                 )
 
                 .addFilterBefore(

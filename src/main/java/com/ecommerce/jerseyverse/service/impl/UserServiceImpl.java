@@ -10,6 +10,7 @@ import com.ecommerce.jerseyverse.exception.UnauthorizedException;
 import com.ecommerce.jerseyverse.mapper.UserMapper;
 import com.ecommerce.jerseyverse.repository.UserRepository;
 import com.ecommerce.jerseyverse.security.userdetails.CustomUserDetails;
+import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
 import com.ecommerce.jerseyverse.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,27 +29,11 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    private User getAuthenticatedUser() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-
-        return userDetails.getUser();
-    }
 
     @Override
     public UserProfileResponseDto getCurrentUser() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-
-        User user = userDetails.getUser();
+        User user = SecurityUtils.getCurrentUser();
 
         return UserMapper.toUserProfileResponse(user);
     }
@@ -56,7 +41,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserProfileResponseDto updateProfile(UpdateUserRequestDto request) {
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = SecurityUtils.getCurrentUser();
 
         if (!currentUser.getPhoneNumber().equals(request.getPhoneNumber())
                 && userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
@@ -73,7 +58,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(ChangePasswordRequestDto request) {
-        User currentUser = getAuthenticatedUser();
+
+        User currentUser = SecurityUtils.getCurrentUser();
 
         if (!passwordEncoder.matches(
                 request.getCurrentPassword(),

@@ -10,6 +10,7 @@ import com.ecommerce.jerseyverse.mapper.AddressMapper;
 import com.ecommerce.jerseyverse.repository.AddressRepository;
 import com.ecommerce.jerseyverse.repository.UserRepository;
 import com.ecommerce.jerseyverse.security.userdetails.CustomUserDetails;
+import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
 import com.ecommerce.jerseyverse.service.AddressService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,20 +30,9 @@ public class AddressServiceImpl implements AddressService {
         this.userRepository = userRepository;
     }
 
-    private User getAuthenticatedUser() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-
-        return userDetails.getUser();
-    }
-
     private Address getUserAddress(Long addressId) {
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = SecurityUtils.getCurrentUser();
 
         return addressRepository
                 .findByIdAndUser(addressId, currentUser)
@@ -53,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressResponseDto createAddress(CreateAddressRequestDto request) {
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = SecurityUtils.getCurrentUser();
 
         if (request.isDefault()) {
 
@@ -76,7 +66,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public List<AddressResponseDto> getAllAddresses() {
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = SecurityUtils.getCurrentUser();
 
         return addressRepository.findByUser(currentUser)
                 .stream()
@@ -109,7 +99,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public void setDefaultAddress(Long addressId) {
 
-        User currentUser = getAuthenticatedUser();
+        User currentUser = SecurityUtils.getCurrentUser();
 
         Address selectedAddress = getUserAddress(addressId);
 
