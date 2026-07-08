@@ -3,10 +3,7 @@ package com.ecommerce.jerseyverse.mapper;
 
 import com.ecommerce.jerseyverse.dto.request.product.CreateProductRequest;
 import com.ecommerce.jerseyverse.dto.request.product.UpdateProductRequest;
-import com.ecommerce.jerseyverse.dto.response.Product.AdminProductResponse;
-import com.ecommerce.jerseyverse.dto.response.Product.CustomerAvailableSizeResponse;
-import com.ecommerce.jerseyverse.dto.response.Product.ProductDetailResponse;
-import com.ecommerce.jerseyverse.dto.response.Product.ProductSummaryResponse;
+import com.ecommerce.jerseyverse.dto.response.Product.*;
 import com.ecommerce.jerseyverse.entity.Product;
 import com.ecommerce.jerseyverse.entity.ProductVariant;
 import org.springframework.stereotype.Component;
@@ -130,6 +127,20 @@ public class ProductMapper {
         return calculateTotalStock(product) > 0
                 ? "IN_STOCK"
                 : "OUT_OF_STOCK";
+    }
+
+    public AdminProductDetailResponse toAdminProductDetailResponse(Product product) {
+
+        AdminProductDetailResponse response = new AdminProductDetailResponse();
+
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setDescription(product.getDescription());
+        response.setPrice(product.getPrice());
+        response.setImageUrl(product.getImageUrl());
+        response.setCategoryId(product.getCategory().getId());
+
+        return response;
     }
 
 }
