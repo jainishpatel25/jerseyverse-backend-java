@@ -1,10 +1,10 @@
-package com.ecommerce.jerseyverse.controller;
+package com.ecommerce.jerseyverse.controller.customer;
 
 import com.ecommerce.jerseyverse.dto.request.LoginRequestDto;
 import com.ecommerce.jerseyverse.dto.request.RegisterRequestDto;
 import com.ecommerce.jerseyverse.dto.response.LoginResponseDto;
 import com.ecommerce.jerseyverse.dto.response.RegisterResponseDto;
-import com.ecommerce.jerseyverse.service.AuthService;
+import com.ecommerce.jerseyverse.service.customer.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

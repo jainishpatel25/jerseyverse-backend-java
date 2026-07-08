@@ -1,9 +1,9 @@
-package com.ecommerce.jerseyverse.controller;
+package com.ecommerce.jerseyverse.controller.customer;
 
 import com.ecommerce.jerseyverse.dto.request.ChangePasswordRequestDto;
 import com.ecommerce.jerseyverse.dto.request.UpdateUserRequestDto;
 import com.ecommerce.jerseyverse.dto.response.UserProfileResponseDto;
-import com.ecommerce.jerseyverse.service.UserService;
+import com.ecommerce.jerseyverse.service.customer.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

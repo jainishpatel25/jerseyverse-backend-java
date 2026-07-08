@@ -1,4 +1,4 @@
-package com.ecommerce.jerseyverse.service.impl;
+package com.ecommerce.jerseyverse.service.customer.impl;
 
 import com.ecommerce.jerseyverse.dto.request.CreateAddressRequestDto;
 import com.ecommerce.jerseyverse.dto.request.UpdateAddressRequestDto;
@@ -9,11 +9,8 @@ import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
 import com.ecommerce.jerseyverse.mapper.AddressMapper;
 import com.ecommerce.jerseyverse.repository.AddressRepository;
 import com.ecommerce.jerseyverse.repository.UserRepository;
-import com.ecommerce.jerseyverse.security.userdetails.CustomUserDetails;
 import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
-import com.ecommerce.jerseyverse.service.AddressService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.ecommerce.jerseyverse.service.customer.AddressService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

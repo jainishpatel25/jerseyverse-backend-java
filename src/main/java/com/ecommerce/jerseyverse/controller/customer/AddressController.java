@@ -1,9 +1,9 @@
-package com.ecommerce.jerseyverse.controller;
+package com.ecommerce.jerseyverse.controller.customer;
 
 import com.ecommerce.jerseyverse.dto.request.CreateAddressRequestDto;
 import com.ecommerce.jerseyverse.dto.request.UpdateAddressRequestDto;
 import com.ecommerce.jerseyverse.dto.response.AddressResponseDto;
-import com.ecommerce.jerseyverse.service.AddressService;
+import com.ecommerce.jerseyverse.service.customer.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

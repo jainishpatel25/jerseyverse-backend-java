@@ -1,4 +1,4 @@
-package com.ecommerce.jerseyverse.controller;
+package com.ecommerce.jerseyverse.controller.customer;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

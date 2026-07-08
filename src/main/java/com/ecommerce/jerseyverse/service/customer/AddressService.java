@@ -1,4 +1,4 @@
-package com.ecommerce.jerseyverse.service;
+package com.ecommerce.jerseyverse.service.customer;
 
 import com.ecommerce.jerseyverse.dto.request.CreateAddressRequestDto;
 import com.ecommerce.jerseyverse.dto.request.UpdateAddressRequestDto;

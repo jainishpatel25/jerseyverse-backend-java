@@ -1,4 +1,4 @@
-package com.ecommerce.jerseyverse.service.impl;
+package com.ecommerce.jerseyverse.service.customer.impl;
 
 import com.ecommerce.jerseyverse.dto.request.ChangePasswordRequestDto;
 import com.ecommerce.jerseyverse.dto.request.UpdateUserRequestDto;
@@ -9,11 +9,8 @@ import com.ecommerce.jerseyverse.exception.ConflictException;
 import com.ecommerce.jerseyverse.exception.UnauthorizedException;
 import com.ecommerce.jerseyverse.mapper.UserMapper;
 import com.ecommerce.jerseyverse.repository.UserRepository;
-import com.ecommerce.jerseyverse.security.userdetails.CustomUserDetails;
 import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
-import com.ecommerce.jerseyverse.service.UserService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.ecommerce.jerseyverse.service.customer.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
