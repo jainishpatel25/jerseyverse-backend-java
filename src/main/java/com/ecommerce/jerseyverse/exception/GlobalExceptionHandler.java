@@ -145,4 +145,16 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidProductVariantException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidProductVariantException(
+            InvalidProductVariantException ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request
+        );
+    }
+
 }

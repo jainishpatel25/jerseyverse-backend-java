@@ -1,10 +1,12 @@
 package com.ecommerce.jerseyverse.dto.request.product;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class UpdateProductRequest {
 
@@ -23,6 +25,17 @@ public class UpdateProductRequest {
 
     @NotBlank(message = "Product image URL is required.")
     private String imageUrl;
+
+    public List<ProductVariantRequest> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(List<ProductVariantRequest> variants) {
+        this.variants = variants;
+    }
+
+    @Valid
+    private List<ProductVariantRequest> variants;
 
     public String getName() {
         return name;

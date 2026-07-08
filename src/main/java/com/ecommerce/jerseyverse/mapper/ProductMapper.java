@@ -140,6 +140,23 @@ public class ProductMapper {
         response.setImageUrl(product.getImageUrl());
         response.setCategoryId(product.getCategory().getId());
 
+        response.setVariants(
+                product.getVariants()
+                        .stream()
+                        .map(this::toAdminProductVariantResponse)
+                        .toList()
+        );
+
+        return response;
+    }
+
+    private AdminProductVariantResponse toAdminProductVariantResponse(ProductVariant variant) {
+
+        AdminProductVariantResponse response = new AdminProductVariantResponse();
+
+        response.setSize(variant.getSize());
+        response.setStock(variant.getStock());
+
         return response;
     }
 

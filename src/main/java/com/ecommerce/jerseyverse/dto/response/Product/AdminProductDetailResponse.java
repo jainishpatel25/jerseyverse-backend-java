@@ -1,6 +1,7 @@
 package com.ecommerce.jerseyverse.dto.response.Product;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class AdminProductDetailResponse {
     private Long id;
@@ -14,6 +15,16 @@ public class AdminProductDetailResponse {
     private String imageUrl;
 
     private Long categoryId;
+
+    public List<AdminProductVariantResponse> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(List<AdminProductVariantResponse> variants) {
+        this.variants = variants;
+    }
+
+    private List<AdminProductVariantResponse> variants;
 
     public Long getId() {
         return id;
