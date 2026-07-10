@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
     Optional<Product> findByName(String name);
 
@@ -29,6 +30,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT MAX(p.price) FROM Product p")
     BigDecimal findMaximumPrice();
-
-    Page<Product> findAll(Specification<Product> specification, Pageable sortedPagable);
 }

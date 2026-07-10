@@ -51,6 +51,11 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public PageResponse<ProductSummaryResponse> getProducts(String search, BigDecimal minPrice, BigDecimal maxPrice, String sort, Pageable pageable) {
 
+
+        System.out.println("Search     : " + search);
+        System.out.println("Min Price  : " + minPrice);
+        System.out.println("Max Price  : " + maxPrice);
+
         String keyword = (search == null) ? "" : search.trim();
 
         Pageable sortedPagable = buildPageable(pageable, sort);
