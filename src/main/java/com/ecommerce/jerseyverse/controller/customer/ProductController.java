@@ -1,6 +1,7 @@
 package com.ecommerce.jerseyverse.controller.customer;
 
 import com.ecommerce.jerseyverse.dto.response.PageResponse;
+import com.ecommerce.jerseyverse.dto.response.PriceRangeResponse;
 import com.ecommerce.jerseyverse.dto.response.Product.ProductSummaryResponse;
 import com.ecommerce.jerseyverse.service.customer.ProductService;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -35,12 +37,22 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<PageResponse<ProductSummaryResponse>> getProducts(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(required = false) String sort
             ) {
 
         return ResponseEntity.ok(
-                productService.getProducts(search, sort, pageable)
+                productService.getProducts(search, minPrice, maxPrice, sort, pageable)
+        );
+    }
+
+    @GetMapping("/price-range")
+    public ResponseEntity<PriceRangeResponse> getPriceRange() {
+
+        return ResponseEntity.ok(
+                productService.getPriceRange()
         );
     }
 
