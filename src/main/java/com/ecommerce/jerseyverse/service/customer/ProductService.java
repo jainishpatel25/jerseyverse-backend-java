@@ -1,11 +1,16 @@
 package com.ecommerce.jerseyverse.service.customer;
 
+import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.Product.ProductSummaryResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface ProductService {
 
     List<ProductSummaryResponse> getLatestProducts();
+
+    PageResponse<ProductSummaryResponse> getProducts(String search, String sort, Pageable pageable);
 
 }

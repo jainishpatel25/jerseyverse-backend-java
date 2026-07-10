@@ -157,4 +157,16 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidSortOptionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidSortOptionException(
+            InvalidSortOptionException ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request
+        );
+    }
+
 }
