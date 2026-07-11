@@ -2,9 +2,11 @@ package com.ecommerce.jerseyverse.service.customer.impl;
 
 import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.PriceRangeResponse;
+import com.ecommerce.jerseyverse.dto.response.Product.ProductDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.Product.ProductSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Product;
 import com.ecommerce.jerseyverse.exception.InvalidSortOptionException;
+import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
 import com.ecommerce.jerseyverse.mapper.ProductMapper;
 import com.ecommerce.jerseyverse.repository.ProductRepository;
 import com.ecommerce.jerseyverse.service.customer.ProductService;
@@ -135,6 +137,20 @@ public class ProductServiceImpl implements ProductService {
         response.setMaxPrice(productRepository.findMaximumPrice());
 
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProductById(Long productId) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Product not found with id: " + productId
+                        )
+                );
+
+        return productMapper.toProductDetailResponse(product);
     }
 
 }
