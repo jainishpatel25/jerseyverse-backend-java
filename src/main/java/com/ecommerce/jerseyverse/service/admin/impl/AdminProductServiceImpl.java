@@ -24,7 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -112,15 +115,77 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         product.setCategory(category);
 
-        product.getVariants().clear();
+//        product.getVariants().clear();
+//
+//        productRepository.saveAndFlush(product);
+//
+//        replaceProductVariants(product, request.getVariants());
 
-        productRepository.saveAndFlush(product);
-
-        replaceProductVariants(product, request.getVariants());
+        syncProductVariants(
+                product,
+                request.getVariants()
+        );
 
         Product updatedProduct = productRepository.save(product);
 
         return productMapper.toAdminProductDetailResponse(updatedProduct);
+    }
+
+    private void syncProductVariants(
+            Product product,
+            List<ProductVariantRequest> requestedVariants
+    ) {
+
+        Map<Size, ProductVariant> existingVariants =
+                product.getVariants()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                ProductVariant::getSize,
+                                Function.identity()
+                        ));
+
+        Set<Size> requestedSizes = new HashSet<>();
+
+        for (ProductVariantRequest requestVariant : requestedVariants) {
+
+            Size size = requestVariant.getSize();
+
+            requestedSizes.add(size);
+
+            ProductVariant existingVariant =
+                    existingVariants.get(size);
+
+            if (existingVariant != null) {
+
+                existingVariant.setStock(
+                        requestVariant.getStock()
+                );
+
+            } else {
+
+                ProductVariant newVariant =
+                        new ProductVariant();
+
+                newVariant.setSize(size);
+                newVariant.setStock(
+                        requestVariant.getStock()
+                );
+                newVariant.setProduct(product);
+
+                product.getVariants().add(newVariant);
+            }
+        }
+
+        product.getVariants()
+                .stream()
+                .filter(variant ->
+                        !requestedSizes.contains(
+                                variant.getSize()
+                        )
+                )
+                .forEach(variant ->
+                        variant.setStock(0)
+                );
     }
 
     @Override
@@ -151,25 +216,6 @@ public class AdminProductServiceImpl implements AdminProductService {
             throw new ResourceAlreadyExistsException(
                     "Product with name '" + productName + "' already exists."
             );
-        }
-    }
-
-    private void replaceProductVariants(
-            Product product,
-            List<ProductVariantRequest> requests) {
-
-        validateDuplicateSizes(requests);
-
-
-        for (ProductVariantRequest request : requests) {
-
-            ProductVariant variant = new ProductVariant();
-
-            variant.setSize(request.getSize());
-            variant.setStock(request.getStock());
-            variant.setProduct(product);
-
-            product.getVariants().add(variant);
         }
     }
 

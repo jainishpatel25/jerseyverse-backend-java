@@ -1,6 +1,7 @@
 package com.ecommerce.jerseyverse.service.customer.impl;
 
 import com.ecommerce.jerseyverse.dto.request.cart.AddCartItemRequest;
+import com.ecommerce.jerseyverse.dto.request.cart.UpdateCartItemQuantityRequest;
 import com.ecommerce.jerseyverse.dto.response.cart.CartResponse;
 import com.ecommerce.jerseyverse.entity.Cart;
 import com.ecommerce.jerseyverse.entity.CartItem;
@@ -154,4 +155,106 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    @Override
+    @Transactional
+    public CartResponse updateItemQuantity(
+            Long cartItemId,
+            UpdateCartItemQuantityRequest request
+    ) {
+
+        User user = resolveCurrentUser();
+
+        Cart cart = getRequiredCart(user);
+
+        CartItem cartItem =
+                getRequiredCartItem(
+                        cart,
+                        cartItemId
+                );
+
+        ProductVariant productVariant =
+                cartItem.getProductVariant();
+
+        validateStock(
+                productVariant,
+                request.getQuantity()
+        );
+
+        cartItem.setQuantity(
+                request.getQuantity()
+        );
+
+        cartItemRepository.save(cartItem);
+
+        return cartMapper.toCartResponse(cart);
+    }
+
+    private Cart getRequiredCart(User user) {
+
+        return cartRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Cart not found"
+                        )
+                );
+    }
+
+    private CartItem getRequiredCartItem(
+            Cart cart,
+            Long cartItemId
+    ) {
+
+        return cartItemRepository
+                .findByIdAndCart(
+                        cartItemId,
+                        cart
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Cart item not found"
+                        )
+                );
+    }
+
+    @Override
+    @Transactional
+    public CartResponse removeItem(Long cartItemId) {
+
+        User user = resolveCurrentUser();
+
+        Cart cart = getRequiredCart(user);
+
+        CartItem cartItem =
+                getRequiredCartItem(
+                        cart,
+                        cartItemId
+                );
+
+        cart.getCartItems().remove(cartItem);
+
+        cartItemRepository.delete(cartItem);
+
+        return cartMapper.toCartResponse(cart);
+    }
+
+    @Override
+    @Transactional
+    public CartResponse clearCart() {
+
+        User user = resolveCurrentUser();
+
+        Optional<Cart> cartOptional =
+                cartRepository.findByUser(user);
+
+        if (cartOptional.isEmpty()) {
+
+            return cartMapper.toEmptyCartResponse();
+        }
+
+        Cart cart = cartOptional.get();
+
+        cart.getCartItems().clear();
+
+        return cartMapper.toCartResponse(cart);
+    }
 }
