@@ -71,4 +71,13 @@ public class CartController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/checkout")
+    public ResponseEntity<CartResponse> checkout() {
+
+        CartResponse response =
+                cartService.checkout();
+
+        return ResponseEntity.ok(response);
+    }
 }

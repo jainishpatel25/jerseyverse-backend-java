@@ -19,4 +19,6 @@ public interface CartService {
 
     CartResponse clearCart();
 
+    CartResponse checkout();
+
 }

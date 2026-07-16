@@ -7,6 +7,7 @@ import com.ecommerce.jerseyverse.entity.Cart;
 import com.ecommerce.jerseyverse.entity.CartItem;
 import com.ecommerce.jerseyverse.entity.ProductVariant;
 import com.ecommerce.jerseyverse.entity.User;
+import com.ecommerce.jerseyverse.exception.BadRequestException;
 import com.ecommerce.jerseyverse.exception.InsufficientStockException;
 import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
 import com.ecommerce.jerseyverse.mapper.CartMapper;
@@ -256,5 +257,33 @@ public class CartServiceImpl implements CartService {
         cart.getCartItems().clear();
 
         return cartMapper.toCartResponse(cart);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CartResponse checkout() {
+
+        User user = resolveCurrentUser();
+
+        Cart cart = getRequiredCart(user);
+
+        validateCheckout(cart);
+
+        return cartMapper.toCartResponse(cart);
+    }
+
+    private void validateCheckout(Cart cart) {
+
+        if (cart.getCartItems().isEmpty()) {
+            throw new BadRequestException("Your cart is empty.");
+        }
+
+        for (CartItem cartItem : cart.getCartItems()) {
+
+            validateStock(
+                    cartItem.getProductVariant(),
+                    cartItem.getQuantity()
+            );
+        }
     }
 }
