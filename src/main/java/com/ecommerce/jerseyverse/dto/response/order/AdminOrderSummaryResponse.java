@@ -28,9 +28,7 @@ public class AdminOrderSummaryResponse {
 
     private LocalDateTime createdAt;
 
-    private OrderAddressResponse orderAddressResponse;
 
-    List<OrderItemResponse> orderItemResponseList;
 
     public Long getId() {
         return id;
@@ -38,22 +36,6 @@ public class AdminOrderSummaryResponse {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public OrderAddressResponse getOrderAddressResponse() {
-        return orderAddressResponse;
-    }
-
-    public void setOrderAddressResponse(OrderAddressResponse orderAddressResponse) {
-        this.orderAddressResponse = orderAddressResponse;
-    }
-
-    public List<OrderItemResponse> getOrderItemResponseList() {
-        return orderItemResponseList;
-    }
-
-    public void setOrderItemResponseList(List<OrderItemResponse> orderItemResponseList) {
-        this.orderItemResponseList = orderItemResponseList;
     }
 
     public String getOrderNumber() {
