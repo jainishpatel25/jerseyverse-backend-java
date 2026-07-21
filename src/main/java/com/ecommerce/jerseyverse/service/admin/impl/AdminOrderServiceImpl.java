@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AdminOrderServiceImpl implements AdminOrderService {
 
-    final private OrderRepository orderRepository;
-    final private OrderMapper orderMapper;
+     private final OrderRepository orderRepository;
+     private final OrderMapper orderMapper;
 
     public AdminOrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
