@@ -1,12 +1,15 @@
 package com.ecommerce.jerseyverse.service.customer.impl;
 
 import com.ecommerce.jerseyverse.dto.request.order.PlaceOrderRequest;
+import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.order.OrderDetailResponse;
+import com.ecommerce.jerseyverse.dto.response.order.OrderSummaryResponse;
 import com.ecommerce.jerseyverse.entity.*;
 import com.ecommerce.jerseyverse.enums.OrderStatus;
 import com.ecommerce.jerseyverse.enums.PaymentMethod;
 import com.ecommerce.jerseyverse.enums.PaymentStatus;
 import com.ecommerce.jerseyverse.exception.BadRequestException;
+import com.ecommerce.jerseyverse.exception.IllegalStateException;
 import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
 import com.ecommerce.jerseyverse.mapper.OrderMapper;
 import com.ecommerce.jerseyverse.repository.AddressRepository;
@@ -15,6 +18,10 @@ import com.ecommerce.jerseyverse.repository.OrderRepository;
 import com.ecommerce.jerseyverse.repository.ProductVariantRepository;
 import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
 import com.ecommerce.jerseyverse.service.customer.OrderService;
+import com.ecommerce.jerseyverse.util.PaginationUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -22,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -87,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
                         new ResourceNotFoundException("Cart not found."));
 
         if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
-            throw new BadRequestException("Cannot place an order with an empty cart.");
+            throw new BadRequestException("Your cart is empty.");
         }
 
         return cart;
@@ -102,6 +110,10 @@ public class OrderServiceImpl implements OrderService {
 
     private void validatePaymentMethod(PaymentMethod paymentMethod) {
 
+        if (paymentMethod == null) {
+            throw new BadRequestException("Payment method is required.");
+        }
+
         if (paymentMethod != PaymentMethod.COD) {
             throw new BadRequestException("Only Cash on Delivery is currently supported.");
         }
@@ -113,13 +125,25 @@ public class OrderServiceImpl implements OrderService {
 
             ProductVariant variant = cartItem.getProductVariant();
 
-            if (variant.getStock() < cartItem.getQuantity()) {
+            if (variant.getStock() <= 0) {
                 throw new BadRequestException(
-                        "Insufficient stock for "
-                                + variant.getProduct().getName()
-                                + " (Size: "
-                                + variant.getSize()
-                                + ").");
+                        String.format(
+                                "%s (Size: %s) is currently out of stock.",
+                                variant.getProduct().getName(),
+                                variant.getSize()
+                        )
+                );
+            }
+
+            if (cartItem.getQuantity() > variant.getStock()) {
+                throw new BadRequestException(
+                        String.format(
+                                "Only %d item(s) available for %s (Size: %s).",
+                                variant.getStock(),
+                                variant.getProduct().getName(),
+                                variant.getSize()
+                        )
+                );
             }
         }
     }
@@ -134,11 +158,16 @@ public class OrderServiceImpl implements OrderService {
 
         String lastOrderNumber = latestOrder.get().getOrderNumber();
 
-        int sequence = Integer.parseInt(lastOrderNumber.substring(2));
+        try {
 
-        sequence++;
+            int sequence = Integer.parseInt(lastOrderNumber.substring(2));
 
-        return String.format("SO%05d", sequence);
+            return String.format("SO%05d", ++sequence);
+
+        } catch (NumberFormatException ex) {
+
+            throw new IllegalStateException("Invalid order number format.");
+        }
     }
 
     private Order createOrder(
@@ -265,6 +294,32 @@ public class OrderServiceImpl implements OrderService {
         cart.getCartItems().clear();
 
         cartRepository.save(cart);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<OrderSummaryResponse> getMyOrders(Pageable pageable) {
+
+        User user = securityUtils.getCurrentUser();
+
+        Page<OrderSummaryResponse> orderPage = orderRepository
+                .findByUser(user, pageable)
+                .map(orderMapper::toOrderSummaryResponse);
+
+        return PaginationUtils.buildPageResponse(orderPage);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDetailResponse getOrderById(Long orderId) {
+
+        User user = securityUtils.getCurrentUser();
+
+        Order order = orderRepository.findByIdAndUser(orderId, user)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Order not found."));
+
+        return orderMapper.toOrderDetailResponse(order);
     }
 
 }
