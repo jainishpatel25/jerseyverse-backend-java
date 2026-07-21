@@ -6,6 +6,9 @@ import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.order.AdminOrderDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.order.AdminOrderSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Order;
+import com.ecommerce.jerseyverse.enums.OrderStatus;
+import com.ecommerce.jerseyverse.enums.PaymentStatus;
+import com.ecommerce.jerseyverse.exception.BadRequestException;
 import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
 import com.ecommerce.jerseyverse.mapper.OrderMapper;
 import com.ecommerce.jerseyverse.repository.OrderRepository;
@@ -51,12 +54,168 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    public AdminOrderDetailResponse updateOrderStatus(Long orderId, UpdateOrderStatusRequest request) {
-        return null;
+    @Transactional
+    public AdminOrderDetailResponse updateOrderStatus(
+            Long orderId,
+            UpdateOrderStatusRequest request) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Order not found."));
+
+        validateOrderStatusTransition(
+                order.getStatus(),
+                request.getStatus()
+        );
+
+        order.setStatus(request.getStatus());
+
+        Order updatedOrder = orderRepository.save(order);
+
+        return orderMapper.toAdminOrderDetailResponse(updatedOrder);
+    }
+
+    private void validateOrderStatusTransition(
+            OrderStatus currentStatus,
+            OrderStatus newStatus) {
+
+        if (currentStatus == newStatus) {
+            throw new BadRequestException(
+                    "Order is already in " + currentStatus + " status."
+            );
+        }
+
+        switch (currentStatus) {
+
+            case PENDING:
+
+                if (newStatus != OrderStatus.CONFIRMED
+                        && newStatus != OrderStatus.CANCELLED) {
+
+                    throw new BadRequestException(
+                            "A pending order can only be confirmed or cancelled."
+                    );
+                }
+
+                break;
+
+            case CONFIRMED:
+
+                if (newStatus != OrderStatus.PROCESSING
+                        && newStatus != OrderStatus.CANCELLED) {
+
+                    throw new BadRequestException(
+                            "A confirmed order can only move to processing or be cancelled."
+                    );
+                }
+
+                break;
+
+            case PROCESSING:
+
+                if (newStatus != OrderStatus.SHIPPED) {
+
+                    throw new BadRequestException(
+                            "A processing order can only be shipped."
+                    );
+                }
+
+                break;
+
+            case SHIPPED:
+
+                if (newStatus != OrderStatus.DELIVERED) {
+
+                    throw new BadRequestException(
+                            "A shipped order can only be delivered."
+                    );
+                }
+
+                break;
+
+            case DELIVERED:
+
+                throw new BadRequestException(
+                        "Delivered orders cannot be updated."
+                );
+
+            case CANCELLED:
+
+                throw new BadRequestException(
+                        "Cancelled orders cannot be updated."
+                );
+
+            default:
+
+                throw new BadRequestException(
+                        "Invalid order status transition."
+                );
+        }
     }
 
     @Override
-    public AdminOrderDetailResponse updatePaymentStatus(Long orderId, UpdatePaymentStatusRequest request) {
-        return null;
+    @Transactional
+    public AdminOrderDetailResponse updatePaymentStatus(
+            Long orderId,
+            UpdatePaymentStatusRequest request) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Order not found."));
+
+        validatePaymentStatusTransition(
+                order.getPaymentStatus(),
+                request.getPaymentStatus()
+        );
+
+        order.setPaymentStatus(request.getPaymentStatus());
+
+        Order updatedOrder = orderRepository.save(order);
+
+        return orderMapper.toAdminOrderDetailResponse(updatedOrder);
+    }
+
+    private void validatePaymentStatusTransition(
+            PaymentStatus currentStatus,
+            PaymentStatus newStatus) {
+
+        if (currentStatus == newStatus) {
+            throw new BadRequestException(
+                    "Payment is already in " + currentStatus + " status."
+            );
+        }
+
+        switch (currentStatus) {
+
+            case PENDING:
+
+                if (newStatus != PaymentStatus.PAID
+                        && newStatus != PaymentStatus.FAILED) {
+
+                    throw new BadRequestException(
+                            "A pending payment can only be marked as paid or failed."
+                    );
+                }
+
+                break;
+
+            case PAID:
+
+                throw new BadRequestException(
+                        "Paid payments cannot be updated."
+                );
+
+            case FAILED:
+
+                throw new BadRequestException(
+                        "Failed payments cannot be updated."
+                );
+
+            default:
+
+                throw new BadRequestException(
+                        "Invalid payment status transition."
+                );
+        }
     }
 }
