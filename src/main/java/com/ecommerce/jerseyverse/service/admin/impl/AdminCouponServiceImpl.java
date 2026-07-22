@@ -1,7 +1,9 @@
 package com.ecommerce.jerseyverse.service.admin.impl;
 
 import com.ecommerce.jerseyverse.dto.request.coupon.CreateCouponRequest;
+import com.ecommerce.jerseyverse.dto.request.coupon.UpdateCouponRequest;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponDetailResponse;
+import com.ecommerce.jerseyverse.dto.response.coupon.CouponSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Coupon;
 import com.ecommerce.jerseyverse.exception.BadRequestException;
 import com.ecommerce.jerseyverse.exception.ConflictException;
@@ -10,6 +12,15 @@ import com.ecommerce.jerseyverse.repository.CouponRepository;
 import com.ecommerce.jerseyverse.service.admin.AdminCouponService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.ecommerce.jerseyverse.dto.response.PageResponse;
+import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
+import com.ecommerce.jerseyverse.util.PaginationUtils;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 
@@ -80,5 +91,86 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public CouponDetailResponse getCouponById(Long couponId) {
 
+        Coupon coupon = getCouponByIdOrThrow(couponId);
+
+        return couponMapper.toDetailResponse(coupon);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<CouponSummaryResponse> getAllCoupons(
+            int page,
+            int size,
+            String sortBy,
+            String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(page, size, sort);
+
+        Page<Coupon> couponPage =
+                couponRepository.findAll(pageable);
+
+        Page<CouponSummaryResponse> responsePage =
+                couponPage.map(couponMapper::toSummaryResponse);
+
+        return PaginationUtils.buildPageResponse(responsePage);
+    }
+
+    private Coupon getCouponByIdOrThrow(Long couponId) {
+
+        return couponRepository.findById(couponId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Coupon not found with ID: " + couponId));
+    }
+
+    @Override
+    @Transactional
+    public CouponDetailResponse updateCoupon(
+            Long couponId,
+            UpdateCouponRequest request) {
+
+        Coupon coupon = getCouponByIdOrThrow(couponId);
+
+        String couponCode = normalizeCouponCode(
+                request.getCouponCode());
+
+        validateDuplicateCouponCodeForUpdate(
+                couponCode,
+                couponId);
+
+        validateDateRange(
+                request.getStartDate(),
+                request.getEndDate());
+
+        couponMapper.updateEntity(coupon, request);
+
+        coupon.setCouponCode(couponCode);
+
+        Coupon updatedCoupon =
+                couponRepository.save(coupon);
+
+        return couponMapper.toDetailResponse(updatedCoupon);
+    }
+
+    private void validateDuplicateCouponCodeForUpdate(
+            String couponCode,
+            Long couponId) {
+
+        if (couponRepository.existsByCouponCodeAndIdNot(
+                couponCode,
+                couponId)) {
+
+            throw new ConflictException(
+                    "Coupon code already exists.");
+        }
+    }
 }

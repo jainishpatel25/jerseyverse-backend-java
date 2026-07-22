@@ -2,6 +2,7 @@ package com.ecommerce.jerseyverse.mapper;
 
 
 import com.ecommerce.jerseyverse.dto.request.coupon.CreateCouponRequest;
+import com.ecommerce.jerseyverse.dto.request.coupon.UpdateCouponRequest;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Coupon;
@@ -27,7 +28,9 @@ public class CouponMapper {
         return coupon;
     }
 
-    public void updateEntity(Coupon coupon, CreateCouponRequest request) {
+    public void updateEntity(
+            Coupon coupon,
+            UpdateCouponRequest request) {
 
         coupon.setCouponCode(request.getCouponCode().trim().toUpperCase());
         coupon.setDiscountType(request.getDiscountType());
