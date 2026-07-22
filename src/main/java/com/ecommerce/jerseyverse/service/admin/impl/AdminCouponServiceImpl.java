@@ -401,4 +401,31 @@ public class AdminCouponServiceImpl implements AdminCouponService {
                         BigDecimal::add);
     }
 
+    @Override
+    @Transactional
+    public CartResponse removeCoupon() {
+
+        User user = securityUtils.getCurrentUser();
+
+        Cart cart = getCartByUser(user);
+
+        validateCouponApplied(cart);
+
+        cart.setAppliedCouponCode(null);
+        cart.setDiscountAmount(BigDecimal.ZERO);
+
+        Cart updatedCart = cartRepository.save(cart);
+
+        return cartMapper.toCartResponse(updatedCart);
+    }
+
+    private void validateCouponApplied(Cart cart) {
+
+        if (cart.getAppliedCouponCode() == null
+                || cart.getAppliedCouponCode().isBlank()) {
+
+            throw new BadRequestException(
+                    "No coupon is applied to the cart.");
+        }
+    }
 }

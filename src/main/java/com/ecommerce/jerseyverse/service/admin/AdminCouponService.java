@@ -34,4 +34,6 @@ public interface AdminCouponService {
     CartResponse applyCoupon(
             ApplyCouponRequest request);
 
+    CartResponse removeCoupon();
+
 }
