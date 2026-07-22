@@ -2,6 +2,7 @@ package com.ecommerce.jerseyverse.service.admin.impl;
 
 import com.ecommerce.jerseyverse.dto.request.coupon.CreateCouponRequest;
 import com.ecommerce.jerseyverse.dto.request.coupon.UpdateCouponRequest;
+import com.ecommerce.jerseyverse.dto.request.coupon.UpdateCouponStatusRequest;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Coupon;
@@ -172,5 +173,39 @@ public class AdminCouponServiceImpl implements AdminCouponService {
             throw new ConflictException(
                     "Coupon code already exists.");
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteCoupon(Long couponId) {
+
+        Coupon coupon = getCouponByIdOrThrow(couponId);
+
+        validateCouponDeletion(coupon);
+
+        couponRepository.delete(coupon);
+    }
+
+    private void validateCouponDeletion(Coupon coupon) {
+
+        if (coupon.getUsedCount() > 0) {
+            throw new ConflictException(
+                    "Coupon cannot be deleted because it has already been used.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public CouponDetailResponse updateCouponStatus(
+            Long couponId,
+            UpdateCouponStatusRequest request) {
+
+        Coupon coupon = getCouponByIdOrThrow(couponId);
+
+        coupon.setStatus(request.getStatus());
+
+        Coupon updatedCoupon = couponRepository.save(coupon);
+
+        return couponMapper.toDetailResponse(updatedCoupon);
     }
 }

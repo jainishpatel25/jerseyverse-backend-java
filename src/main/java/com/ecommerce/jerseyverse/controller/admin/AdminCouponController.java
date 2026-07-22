@@ -2,6 +2,7 @@ package com.ecommerce.jerseyverse.controller.admin;
 
 import com.ecommerce.jerseyverse.dto.request.coupon.CreateCouponRequest;
 import com.ecommerce.jerseyverse.dto.request.coupon.UpdateCouponRequest;
+import com.ecommerce.jerseyverse.dto.request.coupon.UpdateCouponStatusRequest;
 import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponSummaryResponse;
@@ -64,6 +65,28 @@ public class AdminCouponController {
 
         CouponDetailResponse response =
                 couponService.updateCoupon(couponId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{couponId}")
+    public ResponseEntity<Void> deleteCoupon(
+            @PathVariable Long couponId) {
+
+        couponService.deleteCoupon(couponId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{couponId}/status")
+    public ResponseEntity<CouponDetailResponse> updateCouponStatus(
+            @PathVariable Long couponId,
+            @Valid @RequestBody UpdateCouponStatusRequest request) {
+
+        CouponDetailResponse response =
+                couponService.updateCouponStatus(
+                        couponId,
+                        request);
 
         return ResponseEntity.ok(response);
     }
