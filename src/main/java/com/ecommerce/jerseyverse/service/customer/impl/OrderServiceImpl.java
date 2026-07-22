@@ -17,6 +17,7 @@ import com.ecommerce.jerseyverse.repository.CartRepository;
 import com.ecommerce.jerseyverse.repository.OrderRepository;
 import com.ecommerce.jerseyverse.repository.ProductVariantRepository;
 import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
+import com.ecommerce.jerseyverse.service.admin.AdminCouponService;
 import com.ecommerce.jerseyverse.service.customer.OrderService;
 import com.ecommerce.jerseyverse.util.PaginationUtils;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductVariantRepository productVariantRepository;
     private final OrderMapper orderMapper;
     private final SecurityUtils securityUtils;
+    private final AdminCouponService couponService;
 
     public OrderServiceImpl(
             OrderRepository orderRepository,
@@ -45,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
             AddressRepository addressRepository,
             ProductVariantRepository productVariantRepository,
             OrderMapper orderMapper,
-            SecurityUtils securityUtils) {
+            SecurityUtils securityUtils, AdminCouponService couponService) {
 
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
@@ -53,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
         this.productVariantRepository = productVariantRepository;
         this.orderMapper = orderMapper;
         this.securityUtils = securityUtils;
+        this.couponService = couponService;
     }
 
     @Transactional
@@ -69,6 +72,14 @@ public class OrderServiceImpl implements OrderService {
 
         validateStock(cart);
 
+        BigDecimal discount = BigDecimal.ZERO;
+
+        if (cart.getAppliedCouponCode() != null
+                && !cart.getAppliedCouponCode().isBlank()) {
+
+            discount = couponService.validateCouponForCheckout(cart);
+        }
+
         String orderNumber = generateOrderNumber();
 
         Order order = createOrder(
@@ -76,10 +87,13 @@ public class OrderServiceImpl implements OrderService {
                 cart,
                 address,
                 orderNumber,
-                request.getPaymentMethod()
+                request.getPaymentMethod(),
+                discount
         );
 
         Order savedOrder = orderRepository.save(order);
+
+        couponService.finalizeCouponUsage(cart);
 
         reduceStock(cart);
 
@@ -175,7 +189,8 @@ public class OrderServiceImpl implements OrderService {
             Cart cart,
             Address address,
             String orderNumber,
-            PaymentMethod paymentMethod) {
+            PaymentMethod paymentMethod,
+            BigDecimal discount) {
 
         Order order = new Order();
 
@@ -201,10 +216,16 @@ public class OrderServiceImpl implements OrderService {
 
         BigDecimal shippingCharge = BigDecimal.ZERO;
 
-        BigDecimal totalAmount = subtotal.add(shippingCharge);
+        BigDecimal totalAmount = subtotal
+                .subtract(discount)
+                .add(shippingCharge);
 
         order.setSubtotal(subtotal);
         order.setShippingCharge(shippingCharge);
+
+        order.setCouponCode(cart.getAppliedCouponCode());
+        order.setDiscountAmount(discount);
+
         order.setTotalAmount(totalAmount);
 
         List<OrderItem> orderItems = createOrderItems(order, cart);

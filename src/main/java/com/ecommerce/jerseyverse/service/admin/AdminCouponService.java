@@ -8,6 +8,9 @@ import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.cart.CartResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponSummaryResponse;
+import com.ecommerce.jerseyverse.entity.Cart;
+
+import java.math.BigDecimal;
 
 public interface AdminCouponService {
 
@@ -31,9 +34,18 @@ public interface AdminCouponService {
             Long couponId,
             UpdateCouponStatusRequest request);
 
+
+    //customer realted implementation
+
     CartResponse applyCoupon(
             ApplyCouponRequest request);
 
     CartResponse removeCoupon();
+
+
+    BigDecimal validateCouponForCheckout(
+            Cart cart);
+
+    void finalizeCouponUsage(Cart cart);
 
 }

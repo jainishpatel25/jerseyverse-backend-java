@@ -51,6 +51,9 @@ public class OrderMapper {
         response.setShippingCharge(order.getShippingCharge());
         response.setTotalAmount(order.getTotalAmount());
 
+        response.setCouponCode(order.getCouponCode());
+        response.setDiscountAmount(order.getDiscountAmount());
+
         response.setCreatedAt(order.getCreatedAt());
 
         response.setOrderAddressResponse(

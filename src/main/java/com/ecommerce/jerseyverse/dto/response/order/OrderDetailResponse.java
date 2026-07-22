@@ -28,6 +28,10 @@ public class OrderDetailResponse {
 
     private LocalDateTime createdAt;
 
+    private String couponCode;
+
+    private BigDecimal discountAmount;
+
     private OrderAddressResponse orderAddressResponse;
 
     List<OrderItemResponse> orderItemResponseList;
@@ -102,6 +106,22 @@ public class OrderDetailResponse {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCouponCode() {
+        return couponCode;
+    }
+
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
     }
 
     public OrderAddressResponse getOrderAddressResponse() {

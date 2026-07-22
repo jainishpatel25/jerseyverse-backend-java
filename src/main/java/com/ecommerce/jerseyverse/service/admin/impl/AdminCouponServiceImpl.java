@@ -428,4 +428,65 @@ public class AdminCouponServiceImpl implements AdminCouponService {
                     "No coupon is applied to the cart.");
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal validateCouponForCheckout(Cart cart) {
+
+        if (cart.getAppliedCouponCode() == null
+                || cart.getAppliedCouponCode().isBlank()) {
+
+            return BigDecimal.ZERO;
+        }
+
+        Coupon coupon =
+                getCouponByCode(cart.getAppliedCouponCode());
+
+        BigDecimal subtotal =
+                calculateCartSubtotal(cart);
+
+        validateCouponStatus(coupon);
+
+        validateCouponValidity(coupon);
+
+        validateCouponUsageLimit(coupon);
+
+        validateMinimumOrderAmount(coupon, subtotal);
+
+        return calculateDiscount(
+                coupon,
+                subtotal);
+    }
+
+    private Coupon getCouponFromCart(Cart cart) {
+
+        if (cart.getAppliedCouponCode() == null
+                || cart.getAppliedCouponCode().isBlank()) {
+
+            return null;
+        }
+
+        return getCouponByCode(cart.getAppliedCouponCode());
+    }
+
+    @Override
+    @Transactional
+    public void finalizeCouponUsage(Cart cart) {
+
+        if (cart.getAppliedCouponCode() == null
+                || cart.getAppliedCouponCode().isBlank()) {
+            return;
+        }
+
+        Coupon coupon = getCouponByCode(cart.getAppliedCouponCode());
+
+        coupon.setUsedCount(coupon.getUsedCount() + 1);
+
+        couponRepository.save(coupon);
+
+        cart.setAppliedCouponCode(null);
+        cart.setDiscountAmount(BigDecimal.ZERO);
+
+        cartRepository.save(cart);
+    }
 }
