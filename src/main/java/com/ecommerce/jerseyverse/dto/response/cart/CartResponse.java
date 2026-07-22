@@ -19,6 +19,10 @@ public class CartResponse {
 
     private BigDecimal total;
 
+    private String appliedCouponCode;
+
+    private BigDecimal discountAmount;
+
     public CartResponse() {
     }
 
@@ -76,5 +80,21 @@ public class CartResponse {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public String getAppliedCouponCode() {
+        return appliedCouponCode;
+    }
+
+    public void setAppliedCouponCode(String appliedCouponCode) {
+        this.appliedCouponCode = appliedCouponCode;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
     }
 }
