@@ -32,8 +32,13 @@ public class CartMapper {
                                 BigDecimal::add
                         );
 
-        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal discount =
+                cart.getDiscountAmount() != null
+                        ? cart.getDiscountAmount()
+                        : BigDecimal.ZERO;
+
         BigDecimal deliveryCharge = BigDecimal.ZERO;
+
         BigDecimal tax = BigDecimal.ZERO;
 
         BigDecimal total = subtotal
@@ -50,6 +55,8 @@ public class CartMapper {
         response.setDeliveryCharge(deliveryCharge);
         response.setTax(tax);
         response.setTotal(total);
+        response.setAppliedCouponCode(
+                cart.getAppliedCouponCode());
 
         return response;
     }

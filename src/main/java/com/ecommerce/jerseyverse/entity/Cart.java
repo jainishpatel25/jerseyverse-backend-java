@@ -4,6 +4,7 @@ package com.ecommerce.jerseyverse.entity;
 import com.ecommerce.jerseyverse.common.entity.BaseEntity;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,12 @@ public class Cart extends BaseEntity {
     )
     private List<CartItem> cartItems = new ArrayList<>();
 
+    @Column(name = "applied_coupon_code", length = 50)
+    private String appliedCouponCode;
+
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
     public Cart() {
     }
 
@@ -54,5 +61,21 @@ public class Cart extends BaseEntity {
 
     public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
+    }
+
+    public String getAppliedCouponCode() {
+        return appliedCouponCode;
+    }
+
+    public void setAppliedCouponCode(String appliedCouponCode) {
+        this.appliedCouponCode = appliedCouponCode;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
     }
 }

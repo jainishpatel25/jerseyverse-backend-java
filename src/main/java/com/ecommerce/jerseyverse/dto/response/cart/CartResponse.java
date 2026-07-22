@@ -21,8 +21,6 @@ public class CartResponse {
 
     private String appliedCouponCode;
 
-    private BigDecimal discountAmount;
-
     public CartResponse() {
     }
 
@@ -90,11 +88,4 @@ public class CartResponse {
         this.appliedCouponCode = appliedCouponCode;
     }
 
-    public BigDecimal getDiscountAmount() {
-        return discountAmount;
-    }
-
-    public void setDiscountAmount(BigDecimal discountAmount) {
-        this.discountAmount = discountAmount;
-    }
 }
