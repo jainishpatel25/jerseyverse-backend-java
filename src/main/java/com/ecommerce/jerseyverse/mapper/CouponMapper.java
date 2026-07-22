@@ -19,7 +19,7 @@ public class CouponMapper {
         coupon.setDiscountValue(request.getDiscountValue());
         coupon.setMinimumOrderAmount(request.getMinimumOrderAmount());
         coupon.setMaxUses(request.getMaxUses());
-        coupon.setUsedCount(0);
+//        coupon.setUsedCount(0);
         coupon.setStartDate(request.getStartDate());
         coupon.setEndDate(request.getEndDate());
         coupon.setStatus(request.getStatus());
