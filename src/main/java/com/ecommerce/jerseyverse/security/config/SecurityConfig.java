@@ -39,11 +39,29 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // Public APIs
                         .requestMatchers(
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/login"
+                                "/api/v1/auth/login",
+                                "/api/v1/products/**"
                         ).permitAll()
 
+                        // Admin APIs
+                        .requestMatchers(
+                                "/api/v1/admin/**"
+                        ).hasRole("ADMIN")
+
+                        // Customer APIs
+                        .requestMatchers(
+                                "/api/v1/users/**",
+                                "/api/v1/addresses/**",
+                                "/api/v1/cart/**",
+                                "/api/v1/coupons/**",
+                                "/api/v1/orders/**",
+                                "/api/v1/invoices/**"
+                        ).hasRole("USER")
+
+                        // Secure fallback
                         .anyRequest().authenticated()
                 )
 
