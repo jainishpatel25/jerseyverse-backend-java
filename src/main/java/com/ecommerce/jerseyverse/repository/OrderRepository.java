@@ -32,7 +32,8 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     @Query("""
-        SELECT o.user.id, COUNT(o)
+
+            SELECT o.user.id, COUNT(o)
         FROM Order o
         WHERE o.user.id IN :userIds
         GROUP BY o.user.id
@@ -40,4 +41,17 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
     List<Object[]> countOrdersByUserIds(
             @Param("userIds") List<Long> userIds
     );
-}
+
+    Optional<Order> findTopByInvoiceNumberIsNotNullOrderByIdDesc();
+
+    Page<Order> findByUserAndInvoiceNumberIsNotNull(
+            User user,
+            Pageable pageable
+    );
+
+    Optional<Order> findByInvoiceNumberAndUser(
+            String invoiceNumber,
+            User user
+    );
+
+ }

@@ -16,6 +16,9 @@ public class Order extends BaseEntity {
 
     private String orderNumber;
 
+    @Column(name = "invoice_number", unique = true, length = 30)
+    private String invoiceNumber;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -148,6 +151,14 @@ public class Order extends BaseEntity {
 
     public OrderAddress getOrderAddress() {
         return orderAddress;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
     }
 
     public void setOrderAddress(OrderAddress orderAddress) {

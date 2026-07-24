@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -82,11 +83,14 @@ public class OrderServiceImpl implements OrderService {
 
         String orderNumber = generateOrderNumber();
 
+        String invoiceNumber = generateInvoiceNumber();
+
         Order order = createOrder(
                 user,
                 cart,
                 address,
                 orderNumber,
+                invoiceNumber,
                 request.getPaymentMethod(),
                 discount
         );
@@ -100,6 +104,46 @@ public class OrderServiceImpl implements OrderService {
         clearCart(cart);
 
         return orderMapper.toOrderDetailResponse(savedOrder);
+    }
+
+    private String generateInvoiceNumber() {
+
+        int currentYear = LocalDate.now().getYear();
+
+        Optional<Order> latestInvoiceOrder =
+                orderRepository.findTopByInvoiceNumberIsNotNullOrderByIdDesc();
+
+        if (latestInvoiceOrder.isEmpty()) {
+            return String.format("INV-%d-%06d", currentYear, 1);
+        }
+
+        String lastInvoiceNumber =
+                latestInvoiceOrder.get().getInvoiceNumber();
+
+        try {
+
+            String[] parts = lastInvoiceNumber.split("-");
+
+            if (parts.length != 3) {
+                throw new IllegalStateException(
+                        "Invalid invoice number format."
+                );
+            }
+
+            int sequence = Integer.parseInt(parts[2]);
+
+            return String.format(
+                    "INV-%d-%06d",
+                    currentYear,
+                    ++sequence
+            );
+
+        } catch (NumberFormatException ex) {
+
+            throw new IllegalStateException(
+                    "Invalid invoice number format."
+            );
+        }
     }
 
     private Cart getValidatedCart(User user) {
@@ -189,6 +233,7 @@ public class OrderServiceImpl implements OrderService {
             Cart cart,
             Address address,
             String orderNumber,
+            String invoiceNumber,
             PaymentMethod paymentMethod,
             BigDecimal discount) {
 
@@ -196,6 +241,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setUser(user);
         order.setOrderNumber(orderNumber);
+        order.setInvoiceNumber(invoiceNumber);
 
         order.setStatus(OrderStatus.PENDING);
 
