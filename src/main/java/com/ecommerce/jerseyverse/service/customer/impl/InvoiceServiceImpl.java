@@ -4,10 +4,12 @@ import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.order.InvoiceSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Order;
 import com.ecommerce.jerseyverse.entity.User;
+import com.ecommerce.jerseyverse.exception.ResourceNotFoundException;
 import com.ecommerce.jerseyverse.mapper.InvoiceMapper;
 import com.ecommerce.jerseyverse.repository.OrderRepository;
 import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
 import com.ecommerce.jerseyverse.service.customer.InvoiceService;
+import com.ecommerce.jerseyverse.util.InvoicePdfGenerator;
 import com.ecommerce.jerseyverse.util.PaginationUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,15 +24,17 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final OrderRepository orderRepository;
     private final InvoiceMapper invoiceMapper;
     private final SecurityUtils securityUtils;
+    private final InvoicePdfGenerator invoicePdfGenerator;
 
     public InvoiceServiceImpl(
             OrderRepository orderRepository,
             InvoiceMapper invoiceMapper,
-            SecurityUtils securityUtils
+            SecurityUtils securityUtils, InvoicePdfGenerator invoicePdfGenerator
     ) {
         this.orderRepository = orderRepository;
         this.invoiceMapper = invoiceMapper;
         this.securityUtils = securityUtils;
+        this.invoicePdfGenerator = invoicePdfGenerator;
     }
 
     @Override
@@ -58,6 +62,23 @@ public class InvoiceServiceImpl implements InvoiceService {
                 orderPage.map(invoiceMapper::toInvoiceSummaryResponse);
 
         return PaginationUtils.buildPageResponse(responsePage);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] generateInvoicePdf(String invoiceNumber) {
+
+        User user = securityUtils.getCurrentUser();
+
+        Order order = orderRepository
+                .findByInvoiceNumberAndUser(invoiceNumber, user)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Invoice not found."
+                        )
+                );
+
+        return invoicePdfGenerator.generate(order);
     }
 
 }

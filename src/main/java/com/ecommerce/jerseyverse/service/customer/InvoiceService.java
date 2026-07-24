@@ -10,4 +10,6 @@ public interface InvoiceService {
             int size
     );
 
+    byte[] generateInvoicePdf(String invoiceNumber);
+
 }
