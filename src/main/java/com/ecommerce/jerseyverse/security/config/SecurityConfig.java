@@ -43,7 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
-                                "/api/v1/products/**"
+                                "/api/v1/products/**",
+                                "/error"
                         ).permitAll()
 
                         // Admin APIs
