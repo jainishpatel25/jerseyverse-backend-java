@@ -7,8 +7,10 @@ import com.ecommerce.jerseyverse.dto.response.Product.AdminProductResponse;
 import com.ecommerce.jerseyverse.service.admin.AdminProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,12 +24,13 @@ public class AdminProductController {
         this.adminProductService = adminProductService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdminProductResponse> createProduct(
-            @Valid @RequestBody CreateProductRequest request) {
+
+            @Valid @RequestPart("product") CreateProductRequest request, @RequestPart("image")MultipartFile image) {
 
         AdminProductResponse response =
-                adminProductService.createProduct(request);
+                adminProductService.createProduct(request, image);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

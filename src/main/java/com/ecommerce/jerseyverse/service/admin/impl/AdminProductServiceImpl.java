@@ -18,9 +18,11 @@ import com.ecommerce.jerseyverse.mapper.ProductMapper;
 import com.ecommerce.jerseyverse.repository.CategoryRepository;
 import com.ecommerce.jerseyverse.repository.ProductRepository;
 import com.ecommerce.jerseyverse.repository.ProductVariantRepository;
+import com.ecommerce.jerseyverse.service.ImageStorageService;
 import com.ecommerce.jerseyverse.service.admin.AdminProductService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,41 +30,70 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class AdminProductServiceImpl implements AdminProductService {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(AdminProductServiceImpl.class);
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final ProductVariantRepository productVariantRepository;
+    private final ImageStorageService imageStorageService;
 
     public AdminProductServiceImpl(
             ProductRepository productRepository,
             CategoryRepository categoryRepository,
-            ProductMapper productMapper, ProductVariantRepository productVariantRepository
+            ProductMapper productMapper, ProductVariantRepository productVariantRepository, ImageStorageService imageStorageService
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productMapper = productMapper;
         this.productVariantRepository = productVariantRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @Override
-    public AdminProductResponse createProduct(CreateProductRequest request) {
+    @Transactional
+    public AdminProductResponse createProduct(
+            CreateProductRequest request,
+            MultipartFile image) {
 
         validateProductName(request.getName());
 
         Category category = getRequiredCategory(request.getCategoryId());
 
-        Product product = productMapper.toEntity(request);
+        String imageUrl = imageStorageService.storeProductImage(image);
 
-        product.setCategory(category);
+        try {
+            Product product = productMapper.toEntity(request);
 
-        Product savedProduct = productRepository.save(product);
+            product.setImageUrl(imageUrl);
+            product.setCategory(category);
 
-        return productMapper.toAdminProductResponse(savedProduct);
+            Product savedProduct = productRepository.saveAndFlush(product);
+
+            return productMapper.toAdminProductResponse(savedProduct);
+
+        } catch (Exception e) {
+
+            try {
+                imageStorageService.deleteProductImage(imageUrl);
+            } catch (Exception cleanupException) {
+                logger.error(
+                        "Failed to clean up product image after product creation failure: {}",
+                        imageUrl,
+                        cleanupException
+                );
+            }
+
+            throw e;
+        }
     }
 
     private void validateProductName(String productName) {

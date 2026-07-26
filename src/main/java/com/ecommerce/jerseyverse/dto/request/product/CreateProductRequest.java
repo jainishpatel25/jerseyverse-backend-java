@@ -21,9 +21,6 @@ public class CreateProductRequest {
     @NotNull(message = "Category is required.")
     private Long categoryId;
 
-    @NotBlank(message = "Product image URL is required.")
-    private String imageUrl;
-
     public String getName() {
         return name;
     }
@@ -56,11 +53,4 @@ public class CreateProductRequest {
         this.categoryId = categoryId;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }
