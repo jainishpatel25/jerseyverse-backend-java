@@ -193,6 +193,16 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ImageStorageException.class)
+    public ResponseEntity<ErrorResponse> handleImageStorageException(
+            ImageStorageException ex,
+            HttpServletRequest request) {
 
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request
+        );
+    }
 
 }
