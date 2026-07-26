@@ -56,16 +56,29 @@ public class AdminProductController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{productId}")
+    @PutMapping(
+            value = "/{productId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<AdminProductDetailResponse> updateProduct(
             @PathVariable Long productId,
-            @Valid @RequestBody UpdateProductRequest request
+
+            @Valid
+            @RequestPart("product")
+            UpdateProductRequest request,
+
+            @RequestPart(
+                    value = "image",
+                    required = false
+            )
+            MultipartFile image
     ) {
 
         AdminProductDetailResponse response =
                 adminProductService.updateProduct(
                         productId,
-                        request
+                        request,
+                        image
                 );
 
         return ResponseEntity.ok(response);

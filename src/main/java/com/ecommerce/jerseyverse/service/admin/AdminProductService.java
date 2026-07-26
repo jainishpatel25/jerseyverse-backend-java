@@ -16,7 +16,7 @@ public interface AdminProductService {
 
     AdminProductDetailResponse getProductById(Long productId);
 
-    AdminProductDetailResponse updateProduct(Long productId, UpdateProductRequest request);
+    AdminProductDetailResponse updateProduct(Long productId, UpdateProductRequest request,MultipartFile image);
 
     void deleteProduct(Long productId);
 }

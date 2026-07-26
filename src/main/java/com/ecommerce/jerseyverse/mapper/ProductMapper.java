@@ -35,7 +35,6 @@ public class ProductMapper {
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
-        product.setImageUrl(request.getImageUrl());
     }
 
     /**

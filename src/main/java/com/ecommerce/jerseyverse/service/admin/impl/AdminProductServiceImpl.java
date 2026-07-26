@@ -134,32 +134,85 @@ public class AdminProductServiceImpl implements AdminProductService {
     }
 
     @Override
-    public AdminProductDetailResponse updateProduct(Long productId, UpdateProductRequest request) {
+    @Transactional
+    public AdminProductDetailResponse updateProduct(
+            Long productId,
+            UpdateProductRequest request,
+            MultipartFile image) {
 
         Product product = getRequiredProduct(productId);
 
         ensureUniqueProductName(request.getName(), productId);
 
-        Category category = getRequiredCategory(request.getCategoryId());
+        Category category =
+                getRequiredCategory(request.getCategoryId());
 
-        productMapper.updateEntity(product, request);
+        String oldImageUrl = product.getImageUrl();
+        String newImageUrl = null;
 
-        product.setCategory(category);
+        try {
 
-//        product.getVariants().clear();
-//
-//        productRepository.saveAndFlush(product);
-//
-//        replaceProductVariants(product, request.getVariants());
+            if (image != null && !image.isEmpty()) {
 
-        syncProductVariants(
-                product,
-                request.getVariants()
-        );
+                newImageUrl =
+                        imageStorageService.storeProductImage(image);
+            }
 
-        Product updatedProduct = productRepository.save(product);
+            productMapper.updateEntity(product, request);
 
-        return productMapper.toAdminProductDetailResponse(updatedProduct);
+            product.setCategory(category);
+
+            if (newImageUrl != null) {
+                product.setImageUrl(newImageUrl);
+            }
+
+            syncProductVariants(
+                    product,
+                    request.getVariants()
+            );
+
+            Product updatedProduct =
+                    productRepository.saveAndFlush(product);
+
+            if (newImageUrl != null) {
+
+                try {
+                    imageStorageService.deleteProductImage(
+                            oldImageUrl
+                    );
+                } catch (Exception cleanupException) {
+
+                    logger.error(
+                            "Product updated successfully, but failed to delete old image: {}",
+                            oldImageUrl,
+                            cleanupException
+                    );
+                }
+            }
+
+            return productMapper
+                    .toAdminProductDetailResponse(updatedProduct);
+
+        } catch (Exception e) {
+
+            if (newImageUrl != null) {
+
+                try {
+                    imageStorageService.deleteProductImage(
+                            newImageUrl
+                    );
+                } catch (Exception cleanupException) {
+
+                    logger.error(
+                            "Failed to clean up new product image after update failure: {}",
+                            newImageUrl,
+                            cleanupException
+                    );
+                }
+            }
+
+            throw e;
+        }
     }
 
     private void syncProductVariants(
@@ -225,8 +278,20 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         Product product = getRequiredProduct(productId);
 
-        productRepository.delete(product);
+        String imageUrl = product.getImageUrl();
 
+        productRepository.delete(product);
+        productRepository.flush();
+
+        try {
+            imageStorageService.deleteProductImage(imageUrl);
+        } catch (Exception e) {
+            logger.error(
+                    "Product deleted successfully, but failed to delete product image: {}",
+                    imageUrl,
+                    e
+            );
+        }
     }
 
     private Product getRequiredProduct(Long productId){

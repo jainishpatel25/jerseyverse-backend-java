@@ -23,9 +23,6 @@ public class UpdateProductRequest {
     @NotNull(message = "Category is required.")
     private Long categoryId;
 
-    @NotBlank(message = "Product image URL is required.")
-    private String imageUrl;
-
     public List<ProductVariantRequest> getVariants() {
         return variants;
     }
@@ -69,11 +66,4 @@ public class UpdateProductRequest {
         this.categoryId = categoryId;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }
