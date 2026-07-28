@@ -102,6 +102,7 @@ public class ProductMapper {
         CustomerAvailableSizeResponse response = new CustomerAvailableSizeResponse();
 
         response.setSize(variant.getSize());
+        response.setProductVariantId(variant.getId());
 
         return response;
     }

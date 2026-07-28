@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Component
@@ -19,8 +20,8 @@ public class CartMapper {
     public CartResponse toCartResponse(Cart cart) {
 
         List<CartItemResponse> itemResponses =
-                cart.getCartItems()
-                        .stream()
+                cart.getCartItems().stream()
+                        .sorted(Comparator.comparing(CartItem::getId))
                         .map(this::toCartItemResponse)
                         .toList();
 

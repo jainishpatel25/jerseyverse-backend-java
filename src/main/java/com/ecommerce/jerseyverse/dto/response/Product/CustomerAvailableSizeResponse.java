@@ -5,6 +5,7 @@ import com.ecommerce.jerseyverse.enums.Size;
 public class CustomerAvailableSizeResponse {
 
     private Size size;
+    private Long productVariantId;
 
     public Size getSize() {
         return size;
@@ -12,5 +13,13 @@ public class CustomerAvailableSizeResponse {
 
     public void setSize(Size size) {
         this.size = size;
+    }
+
+    public Long getProductVariantId() {
+        return productVariantId;
+    }
+
+    public void setProductVariantId(Long productVariantId) {
+        this.productVariantId = productVariantId;
     }
 }
