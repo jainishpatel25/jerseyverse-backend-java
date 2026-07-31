@@ -9,6 +9,7 @@ import com.ecommerce.jerseyverse.dto.response.coupon.CouponDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.coupon.CouponSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Cart;
 import com.ecommerce.jerseyverse.entity.Coupon;
+import com.ecommerce.jerseyverse.entity.CouponUsage;
 import com.ecommerce.jerseyverse.entity.User;
 import com.ecommerce.jerseyverse.enums.CouponStatus;
 import com.ecommerce.jerseyverse.enums.DiscountType;
@@ -18,6 +19,7 @@ import com.ecommerce.jerseyverse.mapper.CartMapper;
 import com.ecommerce.jerseyverse.mapper.CouponMapper;
 import com.ecommerce.jerseyverse.repository.CartRepository;
 import com.ecommerce.jerseyverse.repository.CouponRepository;
+import com.ecommerce.jerseyverse.repository.CouponUsageRepository;
 import com.ecommerce.jerseyverse.security.utils.SecurityUtils;
 import com.ecommerce.jerseyverse.service.admin.AdminCouponService;
 import org.springframework.stereotype.Service;
@@ -50,13 +52,16 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     private final CartMapper cartMapper;
 
+    private final CouponUsageRepository couponUsageRepository;
 
-    public AdminCouponServiceImpl(CouponRepository couponRepository, CouponMapper couponMapper, SecurityUtils securityUtils, CartRepository cartRepository, CartMapper cartMapper) {
+
+    public AdminCouponServiceImpl(CouponRepository couponRepository, CouponMapper couponMapper, SecurityUtils securityUtils, CartRepository cartRepository, CartMapper cartMapper, CouponUsageRepository couponUsageRepository) {
         this.couponRepository = couponRepository;
         this.couponMapper = couponMapper;
         this.securityUtils = securityUtils;
         this.cartRepository = cartRepository;
         this.cartMapper = cartMapper;
+        this.couponUsageRepository = couponUsageRepository;
     }
 
     @Override
@@ -249,6 +254,10 @@ public class AdminCouponServiceImpl implements AdminCouponService {
                 cart,
                 subtotal);
 
+        validateCouponNotUsedByCustomer(
+                coupon,
+                user);
+
         BigDecimal discount =
                 calculateDiscount(
                         coupon,
@@ -439,6 +448,8 @@ public class AdminCouponServiceImpl implements AdminCouponService {
             return BigDecimal.ZERO;
         }
 
+        User user = cart.getUser();
+
         Coupon coupon =
                 getCouponByCode(cart.getAppliedCouponCode());
 
@@ -452,6 +463,10 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         validateCouponUsageLimit(coupon);
 
         validateMinimumOrderAmount(coupon, subtotal);
+
+        validateCouponNotUsedByCustomer(
+                coupon,
+                user);
 
         return calculateDiscount(
                 coupon,
@@ -478,9 +493,21 @@ public class AdminCouponServiceImpl implements AdminCouponService {
             return;
         }
 
-        Coupon coupon = getCouponByCode(cart.getAppliedCouponCode());
+        Coupon coupon =
+                getCouponByCode(cart.getAppliedCouponCode());
 
-        coupon.setUsedCount(coupon.getUsedCount() + 1);
+        User user = cart.getUser();
+
+        CouponUsage couponUsage = new CouponUsage();
+
+        couponUsage.setCoupon(coupon);
+        couponUsage.setUser(user);
+
+        couponUsageRepository.save(couponUsage);
+
+        coupon.setUsedCount(
+                coupon.getUsedCount() + 1
+        );
 
         couponRepository.save(coupon);
 
@@ -488,5 +515,22 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         cart.setDiscountAmount(BigDecimal.ZERO);
 
         cartRepository.save(cart);
+    }
+
+    private void validateCouponNotUsedByCustomer(
+            Coupon coupon,
+            User user) {
+
+        boolean alreadyUsed =
+                couponUsageRepository.existsByCouponIdAndUserId(
+                        coupon.getId(),
+                        user.getId()
+                );
+
+        if (alreadyUsed) {
+            throw new BadRequestException(
+                    "You have already used this coupon."
+            );
+        }
     }
 }
