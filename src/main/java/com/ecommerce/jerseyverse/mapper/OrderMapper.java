@@ -111,6 +111,10 @@ public class OrderMapper {
 
         response.setSubtotal(order.getSubtotal());
         response.setShippingCharge(order.getShippingCharge());
+
+        response.setCouponCode(order.getCouponCode());
+        response.setDiscountAmount(order.getDiscountAmount());
+
         response.setTotalAmount(order.getTotalAmount());
 
         response.setCreatedAt(order.getCreatedAt());
