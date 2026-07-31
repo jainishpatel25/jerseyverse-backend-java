@@ -6,6 +6,8 @@ import com.ecommerce.jerseyverse.dto.response.PageResponse;
 import com.ecommerce.jerseyverse.dto.response.order.AdminOrderDetailResponse;
 import com.ecommerce.jerseyverse.dto.response.order.AdminOrderSummaryResponse;
 import com.ecommerce.jerseyverse.entity.Order;
+import com.ecommerce.jerseyverse.entity.OrderItem;
+import com.ecommerce.jerseyverse.entity.ProductVariant;
 import com.ecommerce.jerseyverse.enums.OrderStatus;
 import com.ecommerce.jerseyverse.enums.PaymentStatus;
 import com.ecommerce.jerseyverse.exception.BadRequestException;
@@ -68,12 +70,18 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 request.getStatus()
         );
 
+        if (request.getStatus() == OrderStatus.CANCELLED) {
+            restoreStock(order);
+        }
+
         order.setStatus(request.getStatus());
 
         Order updatedOrder = orderRepository.save(order);
 
         return orderMapper.toAdminOrderDetailResponse(updatedOrder);
     }
+
+
 
     private void validateOrderStatusTransition(
             OrderStatus currentStatus,
@@ -216,6 +224,19 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 throw new BadRequestException(
                         "Invalid payment status transition."
                 );
+        }
+    }
+
+    private void restoreStock(Order order) {
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+
+            ProductVariant variant =
+                    orderItem.getProductVariant();
+
+            variant.setStock(
+                    variant.getStock() + orderItem.getQuantity()
+            );
         }
     }
 }
