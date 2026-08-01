@@ -77,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
 
         response.setAccessToken(token);
         response.setTokenType("Bearer");
+        response.setRole(user.getRole().name());   // <-- Add this
 
         return response;
     }

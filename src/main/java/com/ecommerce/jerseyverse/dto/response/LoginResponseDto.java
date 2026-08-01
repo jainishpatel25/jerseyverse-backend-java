@@ -5,6 +5,16 @@ public class LoginResponseDto {
     private String accessToken;
     private String tokenType = "Bearer";
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    private String role;
+
     public String getAccessToken() {
         return accessToken;
     }
