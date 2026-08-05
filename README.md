@@ -343,4 +343,47 @@ server:
   port: 8081
 ```
 
+## 🔗 Related Repository
+
+This project is part of the **JerseyVerse** full-stack application.
+
+| Repository | Description |
+|------------|-------------|
+| **JerseyVerse Frontend** | React.js frontend application for customer and admin interfaces. |
+
+> **Frontend Repository:** https://github.com/jainishpatel25/jerseyverse-frontend
+
+## 🚀 Future Improvements
+
+The following enhancements are planned for future versions of the project:
+
+- Integrate Swagger / OpenAPI documentation
+- Dockerize the application
+- Implement CI/CD pipelines using GitHub Actions
+- Add unit and integration testing
+- Introduce Flyway or Liquibase for database migrations
+- Support cloud-based file storage (AWS S3, Cloudinary, etc.)
+- Add email notifications for order updates
+- Implement payment gateway integration (Stripe/Razorpay)
+- Add monitoring and logging dashboards
+- Deploy the application to a cloud platform
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+See the `LICENSE` file for more information.
+
+## 👨‍💻 Author
+
+**Jainish Patel**
+
+- Java Backend Developer
+- Spring Boot Enthusiast
+- Passionate about building scalable backend applications
+
+If you found this project useful, feel free to ⭐ the repository.
+
+
+
 
