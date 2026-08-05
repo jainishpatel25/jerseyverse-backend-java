@@ -304,6 +304,8 @@ spring:
 
 > **Note:** The `update` strategy is suitable for local development. For production environments, consider using a database migration tool such as Flyway or Liquibase.
 
+> **Note:** Before running the application, update the placeholder values in `application.yaml` with your local PostgreSQL credentials and a secure JWT secret.
+
 ### Multipart File Upload
 
 The backend supports multipart image uploads for product management.
