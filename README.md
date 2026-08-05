@@ -104,9 +104,6 @@ The backend follows modern Spring Boot development practices with clean separati
 ### Build & Dependency Management
 - Maven
 
-### API Documentation
-- Swagger / OpenAPI
-
 ### File Storage
 - Local File Storage (Multipart Image Upload)
 
@@ -242,4 +239,108 @@ The backend exposes RESTful APIs organized into functional modules. The followin
 | **Admin Customer Management** | Browse customer information and order history. |
 | **Admin Coupon Management** | Create, update, activate, deactivate, and manage coupons. |
 
-> **API Documentation:** Complete API specifications and request/response examples are available through the integrated **Swagger/OpenAPI** interface after running the application.
+## 🔒 Security & Validation
+
+Security is a core part of the JerseyVerse Backend. The application follows modern Spring Boot security practices to protect REST APIs and ensure secure access to resources.
+
+### Authentication
+- JWT (JSON Web Token) based authentication
+- Stateless session management
+- Secure user login and registration
+- Password encryption using BCrypt
+
+### Authorization
+- Role-Based Access Control (RBAC)
+- Separate access levels for **ADMIN** and **CUSTOMER**
+- Protected administrative endpoints
+- Authenticated access to customer-specific resources
+
+### Request Validation
+- Bean Validation for request payloads
+- Input validation before business logic execution
+- Consistent validation error responses
+
+### Exception Handling
+- Centralized global exception handling
+- Standardized API error responses
+- Meaningful HTTP status codes for client and server errors
+
+### Data Protection
+- Passwords stored in encrypted form
+- Database access through Spring Data JPA
+- DTO-based API communication to avoid exposing internal entities
+
+## ⚙️ Configuration
+
+The application is configured using the `application.yaml` file located at:
+
+```text
+src/main/resources/application.yaml
+```
+
+### Database Configuration
+
+Configure your PostgreSQL database connection:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jerseyverse_db
+    username: YOUR_DATABASE_USERNAME
+    password: YOUR_DATABASE_PASSWORD
+```
+
+### JPA & Hibernate
+
+The project uses Spring Data JPA with Hibernate for ORM.
+
+```yaml
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+```
+
+> **Note:** The `update` strategy is suitable for local development. For production environments, consider using a database migration tool such as Flyway or Liquibase.
+
+### Multipart File Upload
+
+The backend supports multipart image uploads for product management.
+
+```yaml
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+```
+
+### JWT Configuration
+
+JWT is used for stateless authentication.
+
+```yaml
+jwt:
+  secret: YOUR_JWT_SECRET
+  expiration: 86400000
+```
+
+### Product Image Storage
+
+Uploaded product images are stored locally.
+
+```yaml
+app:
+  upload:
+    product-dir: uploads/products
+```
+
+### Server Configuration
+
+```yaml
+server:
+  port: 8081
+```
+
+
