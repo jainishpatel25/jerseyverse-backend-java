@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/jerseyverse_db
-    username: postgres
-    password: jainish
+    username: YOUR_DATABASE_USERNAME
+    password: YOUR_DATABASE_PASSWORD
 
   jpa:
     hibernate:
@@ -29,7 +29,7 @@ logging:
             bind: TRACE
 
 jwt:
-    secret: 8vP7mX2kN5qL9rT4yH1cJ6wE3uF8aB2zK7nM5pQ9sR4tY6vX1cD8eF3gH7jL2mN
+    secret: YOUR_JWT_SECRET
     expiration: 86400000
 
 app:
