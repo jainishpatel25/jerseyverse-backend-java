@@ -1,5 +1,6 @@
 package com.ecommerce.jerseyverse.service.admin.impl;
 
+import com.ecommerce.jerseyverse.dto.common.ImageUploadResult;
 import com.ecommerce.jerseyverse.dto.request.product.CreateProductRequest;
 import com.ecommerce.jerseyverse.dto.request.product.ProductVariantRequest;
 import com.ecommerce.jerseyverse.dto.request.product.UpdateProductRequest;
@@ -68,12 +69,14 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         Category category = getRequiredCategory(request.getCategoryId());
 
-        String imageUrl = imageStorageService.storeProductImage(image);
-
+        ImageUploadResult uploadResult =
+                imageStorageService.storeProductImage(image);
         try {
             Product product = productMapper.toEntity(request);
 
-            product.setImageUrl(imageUrl);
+            product.setImageUrl(uploadResult.getImageUrl());
+            product.setImagePublicId(uploadResult.getPublicId());
+
             product.setCategory(category);
 
             Product savedProduct = productRepository.saveAndFlush(product);
@@ -83,11 +86,13 @@ public class AdminProductServiceImpl implements AdminProductService {
         } catch (Exception e) {
 
             try {
-                imageStorageService.deleteProductImage(imageUrl);
-            } catch (Exception cleanupException) {
+                imageStorageService.deleteProductImage(
+                        uploadResult.getPublicId()
+                );            }
+            catch (Exception cleanupException) {
                 logger.error(
                         "Failed to clean up product image after product creation failure: {}",
-                        imageUrl,
+
                         cleanupException
                 );
             }
@@ -147,14 +152,15 @@ public class AdminProductServiceImpl implements AdminProductService {
         Category category =
                 getRequiredCategory(request.getCategoryId());
 
-        String oldImageUrl = product.getImageUrl();
-        String newImageUrl = null;
+        String oldImagePublicId = product.getImagePublicId();
+
+        ImageUploadResult uploadResult = null;
 
         try {
 
             if (image != null && !image.isEmpty()) {
 
-                newImageUrl =
+                uploadResult =
                         imageStorageService.storeProductImage(image);
             }
 
@@ -162,8 +168,15 @@ public class AdminProductServiceImpl implements AdminProductService {
 
             product.setCategory(category);
 
-            if (newImageUrl != null) {
-                product.setImageUrl(newImageUrl);
+            if (uploadResult != null) {
+
+                product.setImageUrl(
+                        uploadResult.getImageUrl()
+                );
+
+                product.setImagePublicId(
+                        uploadResult.getPublicId()
+                );
             }
 
             syncProductVariants(
@@ -174,20 +187,12 @@ public class AdminProductServiceImpl implements AdminProductService {
             Product updatedProduct =
                     productRepository.saveAndFlush(product);
 
-            if (newImageUrl != null) {
+            if (uploadResult != null
+                    && oldImagePublicId != null) {
 
-                try {
-                    imageStorageService.deleteProductImage(
-                            oldImageUrl
-                    );
-                } catch (Exception cleanupException) {
-
-                    logger.error(
-                            "Product updated successfully, but failed to delete old image: {}",
-                            oldImageUrl,
-                            cleanupException
-                    );
-                }
+                imageStorageService.deleteProductImage(
+                        oldImagePublicId
+                );
             }
 
             return productMapper
@@ -195,22 +200,17 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         } catch (Exception e) {
 
-            if (newImageUrl != null) {
+            try {
+                imageStorageService.deleteProductImage(
+                        uploadResult.getPublicId()
+                );
+            } catch (Exception cleanupException) {
 
-                try {
-                    imageStorageService.deleteProductImage(
-                            newImageUrl
-                    );
-                } catch (Exception cleanupException) {
-
-                    logger.error(
-                            "Failed to clean up new product image after update failure: {}",
-                            newImageUrl,
-                            cleanupException
-                    );
-                }
+                logger.error(
+                        "Failed to clean up uploaded image after update failure.",
+                        cleanupException
+                );
             }
-
             throw e;
         }
     }
@@ -278,18 +278,16 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         Product product = getRequiredProduct(productId);
 
-        String imageUrl = product.getImageUrl();
+        String imagePublicId =
+                product.getImagePublicId();
 
         productRepository.delete(product);
         productRepository.flush();
 
-        try {
-            imageStorageService.deleteProductImage(imageUrl);
-        } catch (Exception e) {
-            logger.error(
-                    "Product deleted successfully, but failed to delete product image: {}",
-                    imageUrl,
-                    e
+        if (imagePublicId != null) {
+
+            imageStorageService.deleteProductImage(
+                    imagePublicId
             );
         }
     }

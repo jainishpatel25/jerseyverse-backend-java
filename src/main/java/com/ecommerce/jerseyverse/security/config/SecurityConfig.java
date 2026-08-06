@@ -3,6 +3,7 @@ package com.ecommerce.jerseyverse.security.config;
 import com.ecommerce.jerseyverse.security.filter.JwtAuthenticationFilter;
 import com.ecommerce.jerseyverse.security.handler.CustomAccessDeniedHandler;
 import com.ecommerce.jerseyverse.security.handler.JwtAuthenticationEntryPoint;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,9 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${app.cors.allowed-origin}")
+    private String allowedOrigin;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -100,7 +104,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:3000")
+                List.of(allowedOrigin)
         );
 
         configuration.setAllowedMethods(
@@ -110,6 +114,8 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(
                 List.of("Authorization", "Content-Type")
         );
+
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();

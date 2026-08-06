@@ -1,19 +1,16 @@
 package com.ecommerce.jerseyverse.service.impl;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.ecommerce.jerseyverse.dto.common.ImageUploadResult;
 import com.ecommerce.jerseyverse.exception.ImageStorageException;
 import com.ecommerce.jerseyverse.service.ImageStorageService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class ImageStorageServiceImpl implements ImageStorageService {
@@ -26,83 +23,58 @@ public class ImageStorageServiceImpl implements ImageStorageService {
             "image/webp"
     );
 
-    private static final String PUBLIC_PRODUCT_IMAGE_PATH =
-            "/uploads/products/";
+    private final Cloudinary cloudinary;
 
-    private final Path productUploadPath;
-
-    public ImageStorageServiceImpl(
-            @Value("${app.upload.product-dir}") String productUploadDir) {
-
-        this.productUploadPath = Paths.get(productUploadDir)
-                .toAbsolutePath()
-                .normalize();
-
-        initializeStorageDirectory();
-    }
-
-    private void initializeStorageDirectory() {
-        try {
-            Files.createDirectories(productUploadPath);
-        } catch (IOException e) {
-            throw new ImageStorageException(
-                    "Could not initialize product image storage.",
-                    e
-            );
-        }
+    public ImageStorageServiceImpl(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
     }
 
     @Override
-    public String storeProductImage(MultipartFile image) {
+    public ImageUploadResult storeProductImage(MultipartFile image) {
 
         validateImage(image);
 
-        String extension = getExtension(image.getContentType());
+        try {
 
-        String fileName = UUID.randomUUID() + extension;
-
-        Path destinationPath = productUploadPath
-                .resolve(fileName)
-                .normalize();
-
-        validateStoragePath(destinationPath);
-
-        try (InputStream inputStream = image.getInputStream()) {
-
-            Files.copy(
-                    inputStream,
-                    destinationPath,
-                    StandardCopyOption.REPLACE_EXISTING
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    image.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "jerseyverse/products",
+                            "resource_type", "image"
+                    )
             );
 
+            String imageUrl = uploadResult.get("secure_url").toString();
+
+            String publicId = uploadResult.get("public_id").toString();
+
+            return new ImageUploadResult(imageUrl, publicId);
+
         } catch (IOException e) {
+
             throw new ImageStorageException(
-                    "Failed to store product image.",
+                    "Failed to upload product image.",
                     e
             );
         }
-
-        return PUBLIC_PRODUCT_IMAGE_PATH + fileName;
     }
 
     @Override
-    public void deleteProductImage(String imageUrl) {
+    public void deleteProductImage(String publicId) {
 
-        if (imageUrl == null || imageUrl.isBlank()) {
+        if (publicId == null || publicId.isBlank()) {
             return;
         }
 
-        String fileName = extractFileName(imageUrl);
-
-        Path imagePath = productUploadPath
-                .resolve(fileName)
-                .normalize();
-
-        validateStoragePath(imagePath);
-
         try {
-            Files.deleteIfExists(imagePath);
+
+            cloudinary.uploader().destroy(
+                    publicId,
+                    ObjectUtils.emptyMap()
+            );
+
         } catch (IOException e) {
+
             throw new ImageStorageException(
                     "Failed to delete product image.",
                     e
@@ -135,51 +107,4 @@ public class ImageStorageServiceImpl implements ImageStorageService {
         }
     }
 
-    private String getExtension(String contentType) {
-
-        return switch (contentType) {
-            case "image/jpeg" -> ".jpg";
-            case "image/png" -> ".png";
-            case "image/webp" -> ".webp";
-            default -> throw new ImageStorageException(
-                    "Unsupported product image type."
-            );
-        };
-    }
-
-    private void validateStoragePath(Path path) {
-
-        if (!path.startsWith(productUploadPath)) {
-            throw new ImageStorageException(
-                    "Invalid product image storage path."
-            );
-        }
-    }
-
-    private String extractFileName(String imageUrl) {
-
-        try {
-            Path path = Paths.get(imageUrl);
-            Path fileName = path.getFileName();
-
-            if (fileName == null) {
-                throw new ImageStorageException(
-                        "Invalid product image URL."
-                );
-            }
-
-            return fileName.toString();
-
-        } catch (Exception e) {
-
-            if (e instanceof ImageStorageException) {
-                throw e;
-            }
-
-            throw new ImageStorageException(
-                    "Invalid product image URL.",
-                    e
-            );
-        }
-    }
 }
