@@ -55,7 +55,6 @@ public class SecurityConfig {
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
                                 "/api/v1/products/**",
-                                "/uploads/products/**",
                                 "/error"
                         ).permitAll()
 
@@ -112,7 +111,7 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-                List.of("Authorization", "Content-Type")
+                List.of()
         );
 
         configuration.setAllowCredentials(true);

@@ -10,7 +10,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: ${SHOW_SQL:true}
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
         format_sql: true
@@ -26,16 +26,13 @@ logging:
       hibernate:
         orm:
           jdbc:
-            bind: ${HIBERNATE_BIND_LOG_LEVEL:TRACE}
+            bind: ${HIBERNATE_BIND_LOG_LEVEL:INFO}
 
 jwt:
   secret: ${JWT_SECRET:}
   expiration: ${JWT_EXPIRATION:86400000}
 
 app:
-  upload:
-    product-dir: ${PRODUCT_UPLOAD_DIR:uploads/products}
-
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
 
