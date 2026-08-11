@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/jerseyverse_db}
-    username: ${DATABASE_USERNAME:YOUR_DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD:YOUR_DATABASE_PASSWORD}
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
 
   jpa:
     hibernate:
