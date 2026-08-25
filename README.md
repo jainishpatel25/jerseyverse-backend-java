@@ -9,6 +9,28 @@ The backend follows modern Spring Boot development practices with clean separati
 > **Status:** Completed
 > Backend Development • Frontend Integration • Module Testing • End-to-End Regression Testing
 
+## 🚀 Deployment
+
+The JerseyVerse backend is deployed as a production Spring Boot application using the following infrastructure:
+
+| Component             | Platform        |
+| --------------------- | --------------- |
+| Backend Hosting       | Render          |
+| Containerization      | Docker          |
+| Database              | Neon PostgreSQL |
+| Product Image Storage | Cloudinary      |
+
+The Spring Boot backend is containerized using **Docker** and deployed on **Render**.
+
+The application connects to a production **PostgreSQL database hosted on Neon** and uses **Cloudinary** for persistent product image storage in the production environment.
+
+### Production API
+
+**🔗 [JerseyVerse Backend API](https://jerseyverse-backend-java.onrender.com)**
+
+The backend provides the REST APIs consumed by the deployed JerseyVerse React frontend.
+
+
 ## ✨ Features
 
 ### 🔐 Authentication & Authorization
@@ -122,7 +144,7 @@ The JerseyVerse Backend follows a **Layered Architecture** to ensure clear separ
 
 ### Layered Architecture
 
-```text
+```
                 HTTP Request
                       │
                       ▼
