@@ -2,6 +2,9 @@
 target/
 .mvn/wrapper/maven-wrapper.jar
 
+# Local uploaded files
+uploads/
+
 # IDE
 .idea/
 *.iml
