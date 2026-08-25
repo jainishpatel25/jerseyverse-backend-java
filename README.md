@@ -106,7 +106,7 @@ The backend provides the REST APIs consumed by the deployed JerseyVerse React fr
 - JPA Specifications for filtering
 - Centralized exception handling
 
-  ## 🛠️ Tech Stack
+## 🛠️ Tech Stack
 
 ### Backend
 - Java 25
